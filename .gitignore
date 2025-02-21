@@ -169,3 +169,12 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+.DS_Store
+uv.lock
+.ruff.toml
+.ruff_cache/
+.mypy_cache/
+.pytype/
+.pyre/
+.pytest_cache/
