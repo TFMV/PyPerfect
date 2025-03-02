@@ -6,23 +6,11 @@ build-backend = "setuptools.build_meta"
 name = "pyperfect"
 version = "0.1.0"
 description = "A modern, high-performance Python framework showcasing best practices in 2025."
-authors = [{name = "Thomas F McGeehan V", email = "mcgeehan@gmail.com"}]
-license = {file = "LICENSE"}
+authors = [{ name = "Thomas F McGeehan V", email = "mcgeehan@gmail.com" }]
+license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = [
-    "fastapi",
-    "uvicorn[standard]",
-    "grpcio",
-    "grpcio-tools",
-    "ibis-framework[duckdb]",
-    "pydantic",
-    "loguru",
-    "pydantic",
-    "pytest",
-    "httpx",
-    "py4j"
-]
+dependencies = ["fastapi"]
 
 [project.optional-dependencies]
 dev = ["black", "flake8", "mypy", "pytest", "pytest-cov"]
