@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, HttpUrl
 import pugsql
 from nanoid import generate
-from typing import Tuple, Optional
+from typing import Optional
 from pathlib import Path
 
 # Initialize FastAPI app
@@ -75,11 +75,17 @@ class Bookmark(BaseModel):
 
 
 # Dependencies
-def require_org_access(minimum_required_role: Optional[str] = None):
+# First create a dependency for the current user
+current_user_dependency = Depends(auth.require_user)
+
+
+def require_org_access(minimum_required_role: str | None = None):
     """Dependency factory to check organization access and roles."""
 
-    async def _require_org_access(org_id: str, user: User = Depends(auth.require_user)):
-        user_info_in_org = user.get_org(org_id)
+    async def _require_org_access(
+        org_id: str, current_user: User = current_user_dependency
+    ):
+        user_info_in_org = current_user.get_org(org_id)
         if user_info_in_org is None:
             raise HTTPException(status_code=401, detail="Not a member of this org")
 
@@ -88,7 +94,7 @@ def require_org_access(minimum_required_role: Optional[str] = None):
         ):
             raise HTTPException(status_code=403, detail="Insufficient role in org")
 
-        return (user, user_info_in_org)
+        return (current_user, user_info_in_org)
 
     return _require_org_access
 
@@ -104,7 +110,7 @@ async def health_check():
 async def redirect_to_bookmark(
     bookmark_id: str,
     org_id: str,
-    user_and_org: Tuple[User, UserOrgInfo] = Depends(require_org_access()),
+    user_and_org: tuple[User, UserOrgInfo] = Depends(require_org_access()),
 ):
     """Get a bookmark by ID within an organization."""
     link = queries.get_link(org_id=org_id, bookmark_id=bookmark_id)
@@ -117,7 +123,7 @@ async def redirect_to_bookmark(
 async def create_bookmark(
     bookmark: Bookmark,
     org_id: str,
-    user_and_org: Tuple[User, UserOrgInfo] = Depends(require_org_access()),
+    user_and_org: tuple[User, UserOrgInfo] = Depends(require_org_access()),
 ):
     """Create a new bookmark within an organization."""
     user, _ = user_and_org
@@ -135,7 +141,7 @@ async def create_bookmark(
 async def delete_bookmark(
     org_id: str,
     bookmark_id: str,
-    user_and_org: Tuple[User, UserOrgInfo] = Depends(require_org_access()),
+    user_and_org: tuple[User, UserOrgInfo] = Depends(require_org_access()),
 ):
     """Delete a bookmark by ID within an organization."""
     user, user_info_in_org = user_and_org
@@ -158,7 +164,7 @@ async def delete_bookmark(
 
 @app.get("/{org_id}/bookmarks")
 async def list_bookmarks(
-    org_id: str, user_and_org: Tuple[User, UserOrgInfo] = Depends(require_org_access())
+    org_id: str, user_and_org: tuple[User, UserOrgInfo] = Depends(require_org_access())
 ):
     """List all bookmarks within an organization."""
     bookmarks = queries.list_bookmarks(org_id=org_id)
