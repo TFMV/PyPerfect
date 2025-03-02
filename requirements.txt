@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+pydantic
+pugsql
+nanoid
+python-dotenv
+# For production, uncomment:
+# propelauth-fastapi>=2.1.0
+# dbmate>=1.0.0 
